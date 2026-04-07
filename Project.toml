@@ -1,0 +1,21 @@
+# Copyright (C) 2026 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: MIT
+
+name = "SimpleRefrigerantProperties"
+uuid = "c1a1f1c1-4f1b-4f23-9b1b-5f08f9d4cc2f"
+authors = ["Vedang Deshpande (MERL), Christopher Laughman (MERL)"]
+version = "0.1.0"
+
+[deps]
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
+[compat]
+julia = "1.8"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

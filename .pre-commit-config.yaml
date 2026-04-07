@@ -1,0 +1,24 @@
+# Copyright (C) 2026 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: MIT
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=20000']
+
+  - repo: https://github.com/homebysix/pre-commit-macadmin
+    rev: v1.16.2
+    hooks:
+      - id: check-git-config-email
+        args: ['--domains', 'merl.com']
+
+  - repo: https://github.com/fredrikekre/runic-pre-commit
+    rev: v2.0.1
+    hooks:
+      - id: runic

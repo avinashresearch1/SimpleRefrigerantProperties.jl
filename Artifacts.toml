@@ -1,0 +1,10 @@
+# Copyright (C) 2026 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: MIT
+
+[refrigerant-data]
+git-tree-sha1 = "1622f140675accf6db904ef703f26b43d83da1c4"
+
+    [[refrigerant-data.download]]
+    url = "https://zenodo.org/records/19338073/files/refrigerant-data.tar.gz?download=1"
+    sha256 = "04c296d8cbe8e4f1a09391fbecc3cd66f0e22a63f163cc03f760b7ad1ede7df6"
