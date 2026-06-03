@@ -4,7 +4,7 @@
 
 module SimpleRefrigerantProperties
 
-global VERBOSE = true
+global VERBOSE = false
 
 include("types.jl")
 include("data_utils.jl")
