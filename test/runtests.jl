@@ -5,7 +5,7 @@
 using SimpleRefrigerantProperties
 using Test
 
-SimpleRefrigerantProperties.VERBOSE = false # suppress warnings during testing
+SimpleRefrigerantProperties.VERBOSE[] = false # suppress warnings during testing
 
 # Define query points for testing.
 Pquery = 3.0e6
