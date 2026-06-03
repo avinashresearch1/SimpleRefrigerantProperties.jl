@@ -131,7 +131,7 @@ end
 
 function checkbounds_P(P, data::RefrigerantData)
     if P < data.PMin || P > data.PMax
-        VERBOSE[] && @warn("Input P=$P must be in the interval [data.PMin, data.PMax]. Returning NaNs.")
+        VERBOSE && @warn("Input P=$P must be in the interval [data.PMin, data.PMax]. Returning NaNs.")
         return false
     else
         return true
@@ -140,7 +140,7 @@ end
 
 function checkbounds_h(h, data::RefrigerantData)
     if h < data.hMin || h > data.hMax
-        VERBOSE[] && @warn("Input h=$h must be in the interval [data.hMin, data.hMax]. Returning NaNs.")
+        VERBOSE && @warn("Input h=$h must be in the interval [data.hMin, data.hMax]. Returning NaNs.")
         return false
     else
         return true
