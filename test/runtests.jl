@@ -54,6 +54,18 @@ hquery = 400.0e3
         @test all(isnan.(SimpleRefrigerantProperties.interp2D_property_Ph(Pquery, hquery, :InvalidPropertyName, data; verbose = false)))
         @test all(isnan.(SimpleRefrigerantProperties.interp1D_property_P(Pquery, :InvalidPropertyName, data; verbose = false)))
 
+        # Type stability. The property lookups must be inferable: callers embed these in
+        # generated model code that is statically compiled (e.g. `juliac --trim`), where an
+        # `Any` return propagates into every downstream equation and blocks compilation.
+        D = typeof(data)
+        @test all(isconcretetype, fieldtypes(D))
+        @test Base.return_types(DerDensity_Ph, (Float64, Float64, D))[1] ==
+              Tuple{Float64, Float64, Float64}
+        @test Base.return_types(DerTemperature_Ph, (Float64, Float64, D))[1] ==
+              Tuple{Float64, Float64, Float64}
+        @test Base.return_types(BubbleEnthalpy_P, (Float64, D))[1] == Float64
+        @test Base.return_types(DewEnthalpy_P, (Float64, D))[1] == Float64
+
         println(" ")
     end
 end
