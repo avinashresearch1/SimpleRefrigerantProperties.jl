@@ -86,39 +86,55 @@ function find_bracketing_indices_Ph(Pquery::Real, hquery::Real, PVector, hMatrix
     indx_hB = find_bracketing_index(hMatrix[indx_P, :], hquery)
     indx_hT = find_bracketing_index(hMatrix[indx_P + 1, :], hquery)
 
-    idxs = [[indx_P, indx_hB], [indx_P, indx_hB + 1], [indx_P + 1, indx_hT], [indx_P + 1, indx_hT + 1]]
+    # A tuple of 2-tuples, not a Vector of Vectors: `A[i...]` where `i` is a Vector has
+    # a runtime-unknown number of indices, so it infers as `Any`. With an NTuple{2,Int}
+    # the splat is statically known and the element type is recovered.
+    idxs = ((indx_P, indx_hB), (indx_P, indx_hB + 1), (indx_P + 1, indx_hT), (indx_P + 1, indx_hT + 1))
 
     return idxs # P1=BL, P2=BR, P3=TL, P4=TR.
 end
 
-function interp2D_property_Ph(P, h, property_name, data::RefrigerantData; compute_derivs = true, verbose = true)
-    if !checkbounds_P(P, data) || !checkbounds_h(h, data) || any(isnan.([P, h]))
+# Property tables are selected by `Val` rather than by a runtime-computed Symbol.
+# `getfield(data, Symbol(string(name, :Matrix)))` is not inferable, so the old code
+# returned `Tuple{Any,Any,Any}` from every property call; that `Any` propagated into
+# the model equations and made them uncompilable under `juliac --trim`.
+_prop_matrix(data::RefrigerantData, ::Val{:Density}) = data.DensityMatrix
+_prop_matrix(data::RefrigerantData, ::Val{:Temperature}) = data.TemperatureMatrix
+_prop_matrix(::RefrigerantData, ::Val) = nothing
+
+_prop_vector(data::RefrigerantData, ::Val{:BubbleEnthalpy}) = data.BubbleEnthalpyVector
+_prop_vector(data::RefrigerantData, ::Val{:DewEnthalpy}) = data.DewEnthalpyVector
+_prop_vector(::RefrigerantData, ::Val) = nothing
+
+function interp2D_property_Ph(P, h, ::Val{PROP}, data::RefrigerantData; compute_derivs = true, verbose = true) where {PROP}
+    if !checkbounds_P(P, data) || !checkbounds_h(h, data) || isnan(P) || isnan(h)
         return (NaN, NaN, NaN)
     end
 
-    idxs = find_bracketing_indices_Ph(P, h, data.PVector, data.hMatrix)
-    PVals = [data.PVector[i[1]] for i in idxs]
-    hVals = [data.hMatrix[i...] for i in idxs]
-
-    propKey = Symbol(string(property_name, :Matrix))
-    if haskey(data, propKey)
-        propVals = [getfield(data, propKey)[i...] for i in idxs]
-    else
+    propMat = _prop_matrix(data, Val(PROP))
+    if propMat === nothing
         verbose && @error "Unsupported property name."
         return (NaN, NaN, NaN)
     end
+    idxs = find_bracketing_indices_Ph(P, h, data.PVector, data.hMatrix)
+    PVals = [data.PVector[i[1]] for i in idxs]
+    hVals = [data.hMatrix[i...] for i in idxs]
+    propVals = [propMat[i...] for i in idxs]
+
     return trapezoid_interp(P, h, PVals, hVals, propVals; compute_derivs = compute_derivs)
 end
 
-function interp1D_property_P(P, property_name, data::RefrigerantData; verbose = true)
+# Symbol-taking method kept for API compatibility.
+interp2D_property_Ph(P, h, property_name::Symbol, data::RefrigerantData; kwargs...) =
+    interp2D_property_Ph(P, h, Val(property_name), data; kwargs...)
+
+function interp1D_property_P(P, ::Val{PROP}, data::RefrigerantData; verbose = true) where {PROP}
     if !checkbounds_P(P, data) || isnan(P)
         return (NaN, NaN)
     end
 
-    propKey = Symbol(string(property_name, :Vector))
-    if haskey(data, propKey)
-        propVec = getfield(data, propKey)
-    else
+    propVec = _prop_vector(data, Val(PROP))
+    if propVec === nothing
         verbose && @error "Unsupported property name."
         return (NaN, NaN)
     end
@@ -146,3 +162,7 @@ function checkbounds_h(h, data::RefrigerantData)
         return true
     end
 end
+
+# Symbol-taking method kept for API compatibility.
+interp1D_property_P(P, property_name::Symbol, data::RefrigerantData; kwargs...) =
+    interp1D_property_P(P, Val(property_name), data; kwargs...)

@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
+# Field types are deliberately left unconstrained. Pinning them to abstract types
+# (AbstractFloat / AbstractVector{<:AbstractFloat} / AbstractMatrix{<:AbstractFloat})
+# made every field read type-unstable, which propagated `Any` through every property
+# call and made models using them uncompilable under `juliac --trim`. Naming the
+# fields only lets the loader's concrete element type (Float32 for the shipped
+# tables) flow through unchanged, so instances are concrete and inference succeeds.
 const RefrigerantData = NamedTuple{
     (
         :name,
@@ -17,18 +23,4 @@ const RefrigerantData = NamedTuple{
         :BubbleEnthalpyVector,
         :DewEnthalpyVector,
     ),
-    Tuple{
-        String,
-        AbstractFloat,
-        AbstractFloat,
-        AbstractFloat,
-        AbstractFloat,
-        AbstractFloat,
-        AbstractVector{<:AbstractFloat},
-        AbstractMatrix{<:AbstractFloat},
-        AbstractMatrix{<:AbstractFloat},
-        AbstractMatrix{<:AbstractFloat},
-        AbstractVector{<:AbstractFloat},
-        AbstractVector{<:AbstractFloat},
-    },
 }
