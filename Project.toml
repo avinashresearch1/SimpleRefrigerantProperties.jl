@@ -5,7 +5,7 @@
 name = "SimpleRefrigerantProperties"
 uuid = "c1a1f1c1-4f1b-4f23-9b1b-5f08f9d4cc2f"
 authors = ["Vedang Deshpande (MERL), Christopher Laughman (MERL)"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
